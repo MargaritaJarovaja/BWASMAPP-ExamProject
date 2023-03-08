@@ -1,0 +1,68 @@
+﻿@page "/annonser"
+@inject HttpClient client
+@inject IJSRuntime js
+@*@attribute[Authorize]*@
+
+<h3>Annonser</h3>
+<small>Add as many annons as you wish.</small>
+<div class="form-group">
+    <a class="btn btn-success" href="annonser/create"><i class="oi oi-plus"></i> Create New</a>
+</div>
+<br>
+@if (annonser == null)
+{
+    <text>Loading...</text>
+}
+else if (annonser.Length == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Image</th>                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Annons ann in annonser)
+            {
+                <tr>
+                    <td>@ann.Title</td>
+                    <td>@ann.Discription</td>
+                    <td>@ann.Price</td>
+                    <td>
+                        <img src="data:image;base64,@(Convert.ToBase64String(ann.Image))" style="max-width: 100px;" />
+                    </td>
+                    
+                    <td>
+                        <a class="btn btn-success" href="annonser/showmore/@ann.Id">Show more</a>
+                        <a class="btn btn-success" href="annonser/edit/@ann.Id">Edit</a>
+                        <button class="btn btn-danger" @onclick="@(() => Delete(ann.Id))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    Annons[]? annonser { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        annonser = await client.GetFromJsonAsync<Annons[]>("api/annons");
+    }
+    async Task Delete(int annonsId)
+    {
+        var ann = annonser.First(x => x.Id == annonsId);
+        if (await js.InvokeAsync<bool>("confirm", $"Do you want to delete {ann.Title}'s ({ann.Id}) Record?"))
+        {
+            await client.DeleteAsync($"api/annons/{annonsId}");
+            await OnInitializedAsync();
+        }
+    }
+}

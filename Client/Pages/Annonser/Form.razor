@@ -1,0 +1,59 @@
+﻿<EditForm Model="@ann" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label>Titel:</label>
+        <div>
+            <InputText @bind-Value="@ann.Title" />
+            <ValidationMessage For="@(() => ann.Title)" />
+        </div>
+    </div>
+    <div class="form-group ">
+        <div>
+            <label>Description:</label>
+            <div>
+                <InputText @bind-Value="@ann.Discription" />
+                <ValidationMessage For="@(() => ann.Discription)" />
+            </div>
+        </div>
+    </div>
+    <div class="form-group ">
+        <div>
+            <label>Price:</label>
+            <div>
+                <InputNumber @bind-Value="@ann.Price" />
+                <ValidationMessage For="@(() => ann.Price)" />
+            </div>
+        </div>
+    </div>
+    <div class="form-group ">
+        <div>
+            @*<label>Image :</label>*@
+           @* <div>
+                <Input @bind-Value="@ann.Image" />
+                <ValidationMessage For="@(() => ann.Image)" />
+            </div>*@
+            <div class="form-group">
+                <label for="image">Image</label>
+                <InputFile class="form-control" @bind-Value="@ann.Image" id="image" OnChange="@HandleFileSelected" />
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+</EditForm>
+@code {
+    [Parameter] public Annons? ann { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        using var stream = file.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        ann.Image = memoryStream.ToArray();
+    }
+}

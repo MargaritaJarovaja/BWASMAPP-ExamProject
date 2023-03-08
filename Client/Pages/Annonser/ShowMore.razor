@@ -1,0 +1,85 @@
+﻿@page "/annonser/showmore/{Id:int}"
+@inject HttpClient http
+@inject NavigationManager uriHelper
+@inject IJSRuntime js
+@inject NavigationManager NavigationManager
+
+<h3>Edit Annons</h3>
+
+<EditForm Model="@annons">
+    <DataAnnotationsValidator />
+    <div class="media-img-wrapper mr-2 col-md-4">
+        @if (annons.Image != null)
+        {
+            <img src="data:image;base64,@(Convert.ToBase64String(annons.Image))" style="max-width: 300px;" />
+        }
+        else
+        {
+            <img src="https://via.placeholder.com/300x200?text=No+Image" alt="No Image" class="img-fluid" />
+        }
+    </div>
+    <div class="md-8">
+        <div Value="annons.Title">@annons.Title</div>
+    </div>
+    <div class="md-8">
+        <div Value="annons.Discription">@annons.Discription</div>
+    </div>
+    <div class="md-8">
+        <div Value="annons.Price">@annons.Price</div>
+    </div>
+ 
+
+
+    <div class="form-group">
+        @*<button type="submit" class="btn btn-primary">Save</button>*@
+        <button class="btn btn-light" @onclick="Cancel">Cancel</button>
+    </div>
+</EditForm>
+
+
+
+
+
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    protected string Title = "Details";
+    protected Annons? annons = new();
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != 0)
+        {
+
+            annons = await http.GetFromJsonAsync<Annons>("api/Annons/" + Id);
+        }
+    }
+    protected async Task SaveAnnons()
+    {
+        if (annons.Id != 0)
+        {
+            await http.PutAsJsonAsync("api/Annons", annons);
+        }
+        else
+        {
+            await http.PostAsJsonAsync("api/Annons", annons);
+        }
+        Cancel();
+    }
+    public void Cancel()
+    {
+        NavigationManager.NavigateTo("/annonser");
+    }
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        using var stream = file.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        annons.Image = memoryStream.ToArray();
+    }
+}

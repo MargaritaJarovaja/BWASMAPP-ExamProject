@@ -1,0 +1,14 @@
+﻿@page "/annonser/create"
+@inject HttpClient http
+@inject NavigationManager uriHelper
+<h3>Create</h3>
+<Form ButtonText="Create Annons" ann="@ann"
+      OnValidSubmit="@CreateAnnons" />
+@code {
+    Annons ann = new Annons();
+    async Task CreateAnnons()
+    {
+        await http.PostAsJsonAsync("api/annons", ann);
+        uriHelper.NavigateTo("annonser");
+    }
+}
