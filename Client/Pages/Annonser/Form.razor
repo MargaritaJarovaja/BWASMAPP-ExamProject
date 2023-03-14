@@ -26,12 +26,7 @@
         </div>
     </div>
     <div class="form-group ">
-        <div>
-            @*<label>Image :</label>*@
-           @* <div>
-                <Input @bind-Value="@ann.Image" />
-                <ValidationMessage For="@(() => ann.Image)" />
-            </div>*@
+        <div>          
             <div class="form-group">
                 <label for="image">Image</label>
                 <InputFile class="form-control" @bind-Value="@ann.Image" id="image" OnChange="@HandleFileSelected" />
@@ -46,6 +41,7 @@
     [Parameter] public Annons? ann { get; set; }
     [Parameter] public string ButtonText { get; set; } = "Save";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         var file = e.File;

@@ -1,14 +1,24 @@
 ﻿@page "/annonser/create"
 @inject HttpClient http
 @inject NavigationManager uriHelper
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
 <h3>Create</h3>
 <Form ButtonText="Create Annons" ann="@ann"
       OnValidSubmit="@CreateAnnons" />
+<button class="btn btn-light" @onclick="Cancel">Cancel</button>
 @code {
     Annons ann = new Annons();
+
     async Task CreateAnnons()
     {
         await http.PostAsJsonAsync("api/annons", ann);
         uriHelper.NavigateTo("annonser");
+    }
+
+    public void Cancel()
+    {
+        uriHelper.NavigateTo("/annonser");
     }
 }

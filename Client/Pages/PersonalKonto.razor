@@ -1,0 +1,68 @@
+﻿@page "/personalkonto"
+@inject HttpClient client
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+
+<h3>PersonalKonto</h3>
+
+
+<table>
+    <tbody>
+        @if (annonsUser != null)
+        {
+            @foreach (var ann in annonsUser)
+            {
+                <tr>
+                    <td>@ann.Title</td>
+                    <td>@ann.Discription</td>
+                    <td>@ann.Price</td>
+                    <td>
+                        @if (ann.Image != null)
+                        {
+                            <img src="data:image;base64,@(Convert.ToBase64String(ann.Image))" style="max-width: 100px;" />
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+
+    private Annons[]? annonsUser;
+    Annons[]? annonser { get; set; }
+    public int Id { get; set; }
+    protected Annons[]? searchAnnonsData { get; set; }
+    protected Annons annons = new();
+    protected string SearchString { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        annonser = await client.GetFromJsonAsync<Annons[]>("api/annons");
+        searchAnnonsData = annonser;
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userId = int.Parse(authState.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            annonsUser = await client.GetFromJsonAsync<Annons[]>($"api/annons/user/{userId}");
+
+            if (annonsUser == null)
+            {
+                annonsUser = Array.Empty<Annons>();
+                Console.WriteLine("Annons data:" + annonsUser);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Здесь можно использовать любую систему логирования для записи сообщения об ошибке.
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+}
+   
+
+

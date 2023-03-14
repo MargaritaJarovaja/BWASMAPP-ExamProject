@@ -15,5 +15,6 @@ namespace BWASMAPP.Server.Data
         {
         }
         public DbSet<Annons> Annonser { get; set; }
+       
     }
 }

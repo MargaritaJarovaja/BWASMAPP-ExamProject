@@ -3,6 +3,13 @@ using BWASMAPP.Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Authorization;
+using BWASMAPP.Server.Areas.Identity;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +20,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddIdentityServer()
@@ -21,8 +29,10 @@ builder.Services.AddIdentityServer()
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+//builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 

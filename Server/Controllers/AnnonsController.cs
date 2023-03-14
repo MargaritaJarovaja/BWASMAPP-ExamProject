@@ -1,11 +1,14 @@
 ﻿using BWASMAPP.Server.Data;
 using BWASMAPP.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BWASMAPP.Server.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AnnonsController : ControllerBase
@@ -22,6 +25,7 @@ namespace BWASMAPP.Server.Controllers
             var ann = await _context.Annonser.ToListAsync();
             return Ok(ann);
         }
+              
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -29,10 +33,19 @@ namespace BWASMAPP.Server.Controllers
             var ann = await _context.Annonser.FirstOrDefaultAsync(a => a.Id == id);
             return Ok(ann);
         }
+      
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<Annons>>> GetAnnonsByUserId(int userId)
+        {
+            return await _context.Annonser.Where(x => Convert.ToInt32(x.UserId) == userId).ToListAsync();
+        }
 
         [HttpPost]
         public async Task<IActionResult> Post(Annons annons)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    annons.UserId = userId;
             _context.Add(annons);
             await _context.SaveChangesAsync();
             return Ok(annons.Id);

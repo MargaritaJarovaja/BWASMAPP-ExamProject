@@ -1,4 +1,4 @@
-﻿@page "/annonser/showmore/{Id:int}"
+﻿@page "/viewannonsdetails/{Id:int}"
 @inject HttpClient http
 @inject NavigationManager uriHelper
 @inject IJSRuntime js
@@ -31,11 +31,16 @@
         <div Value="annons.Price">@annons.Price</div>
     </div>
 
-    <div class="form-group">
-      
+
+
+    <div class="form-group">       
         <button class="btn btn-light" @onclick="Cancel">Cancel</button>
     </div>
 </EditForm>
+
+
+
+
 
 
 
@@ -45,7 +50,6 @@
     public int Id { get; set; }
     protected string Title = "Details";
     protected Annons? annons = new();
-
     protected override async Task OnParametersSetAsync()
     {
         if (Id != 0)
@@ -54,7 +58,6 @@
             annons = await http.GetFromJsonAsync<Annons>("api/Annons/" + Id);
         }
     }
-
     protected async Task SaveAnnons()
     {
         if (annons.Id != 0)
@@ -67,12 +70,10 @@
         }
         Cancel();
     }
-
     public void Cancel()
     {
-        NavigationManager.NavigateTo("/annonser");       
+        NavigationManager.NavigateTo("/viewannons");
     }
-
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         var file = e.File;

@@ -1,7 +1,9 @@
 ﻿@page "/annonser"
 @inject HttpClient client
 @inject IJSRuntime js
-@*@attribute[Authorize]*@
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
 
 <h3>Annonser</h3>
 <small>Add as many annons as you wish.</small>
@@ -9,6 +11,25 @@
     <a class="btn btn-success" href="annonser/create"><i class="oi oi-plus"></i> Create New</a>
 </div>
 <br>
+<div class="row">
+    <div class="col-md-6">      
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search annons by title"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterAnnons" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+
+
 @if (annonser == null)
 {
     <text>Loading...</text>
@@ -36,8 +57,11 @@ else
                     <td>@ann.Title</td>
                     <td>@ann.Discription</td>
                     <td>@ann.Price</td>
-                    <td>
-                        <img src="data:image;base64,@(Convert.ToBase64String(ann.Image))" style="max-width: 100px;" />
+                    <td>                     
+                        @if (ann.Image != null)
+                        {
+                            <img src="data:image;base64,@(Convert.ToBase64String(ann.Image))" style="max-width: 100px;" />
+                        }
                     </td>
                     
                     <td>
@@ -52,10 +76,17 @@ else
 }
 @code {
     Annons[]? annonser { get; set; }
+    public int Id { get; set; }    
+    protected Annons[]? searchAnnonsData { get; set; }
+    protected Annons annons = new();
+    protected string SearchString { get; set; } = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         annonser = await client.GetFromJsonAsync<Annons[]>("api/annons");
+        searchAnnonsData = annonser;
     }
+
     async Task Delete(int annonsId)
     {
         var ann = annonser.First(x => x.Id == annonsId);
@@ -63,6 +94,26 @@ else
         {
             await client.DeleteAsync($"api/annons/{annonsId}");
             await OnInitializedAsync();
+        }
+    }
+
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        annonser = searchAnnonsData;
+    }
+
+    protected void FilterAnnons()
+    {
+        if (searchAnnonsData!=null&&!string.IsNullOrEmpty(SearchString))
+        {
+            annonser = searchAnnonsData
+                .Where(x => x.Title.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToArray();
+        }
+        else
+        {
+            annonser = searchAnnonsData;
         }
     }
 }

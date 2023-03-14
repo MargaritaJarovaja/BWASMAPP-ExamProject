@@ -1,0 +1,120 @@
+﻿@page "/viewannons"
+@inject HttpClient http
+@inject NavigationManager uriHelper
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@*@inject NavigationManager NavigationManager*@
+@attribute [Authorize]
+
+
+
+<h1>Annons</h1>
+
+<div class="row">
+    <div class="col-md-6">
+      
+           @* <a href='/addAnnons' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Annons
+        </a>*@
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search annons by title"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterAnnons" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+<br />
+@if (annonsList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{       
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Image</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Annons annons in annonsList)
+                {
+                    <tr>
+                        <td>@annons.Title</td>
+                        <td>@annons.Discription</td>
+                        <td>@annons.Price</td>
+                        <td>                          
+                            @if (annons.Image != null)
+                            {
+                                <img src="data:image;base64,@(Convert.ToBase64String(annons.Image))" style="max-width: 100px;" />
+                            }
+                        </td>
+
+                        <td>
+                            <a class="btn btn-success" href="viewannonsdetails/@annons.Id">Show more</a>                           
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    
+
+    
+}
+@code {
+    public int Id{ get; set; }
+    protected List<Annons> annonsList = new();
+    protected List<Annons> searchAnnonsData = new();
+    protected Annons annons = new();
+    protected string SearchString { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAnnons();        
+    }
+
+    protected async Task GetAnnons()
+    {
+        annonsList = await http.GetFromJsonAsync<List<Annons>>("api/Annons");
+        searchAnnonsData = annonsList;
+    }
+
+    protected void FilterAnnons()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            annonsList = searchAnnonsData
+                .Where(x => x.Title.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            annonsList = searchAnnonsData;
+        }
+    }
+  
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        annonsList = searchAnnonsData;
+    }
+
+    private List<Annons> annonser;
+    void ShowAnnons(int id)
+    {
+        uriHelper.NavigateTo($"viewannonsdetails/{id}");
+    }
+
+}
