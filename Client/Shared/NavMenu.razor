@@ -1,5 +1,4 @@
-﻿<AuthorizeView>
-    <Authorized>
+﻿
 
         <div class="top-row ps-3 navbar navbar-dark">
             <div class="container-fluid">
@@ -13,31 +12,35 @@
         <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
             <nav class="flex-column">
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="viewannons" Match="NavLinkMatch.All">
                         <span class="oi oi-home" aria-hidden="true"></span> Home
                     </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="annonser">
-                        <span class="oi oi-list-rich" aria-hidden="true"></span> Admin Annonser
-                    </NavLink>
-                </div>
+                </div>     
+                
+                <AuthorizeView Roles="Admin">
+                 <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="annonser">
+                            <span class="oi oi-list-rich" aria-hidden="true"></span> Admin Annonser
+                        </NavLink>
+                    </div>
+                 </Authorized>
+                </AuthorizeView>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="personalkonto">
                         <span class="oi oi-list-rich" aria-hidden="true"></span> Personal Konto
                     </NavLink>
                 </div>
 
-                <div class="nav-item px-3">
+               @* <div class="nav-item px-3">
                     <NavLink class="nav-link" href="viewannons">
                         <span class="oi oi-list-rich" aria-hidden="true"></span> Annonser
                     </NavLink>
-                </div>
+                </div>*@
             </nav>
         </div>
 
-    </Authorized>
-</AuthorizeView>
+   
 
 
 @code {

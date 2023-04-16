@@ -6,7 +6,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <a class="text-white px-5" href="authentication/profile">Hej,  @context.User.Identity.Name!</a>
+        <a class="text-dark px-5" href="authentication/profile">Hej, @context.User.Identity.Name!</a>
         <button class="nav-link btn btn-primary mx-12" @onclick="BeginSignOut">Logga ut</button>
     </Authorized>
     <NotAuthorized>

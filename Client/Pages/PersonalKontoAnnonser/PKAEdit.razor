@@ -1,0 +1,34 @@
+﻿@page "/personalkontoannonser/pkaedit/{annonsId:int}"
+@inject HttpClient http
+@inject NavigationManager uriHelper
+@inject IJSRuntime js
+@using BWASMAPP.Client.Pages.Annonser
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+<h3>PKAEdit</h3>
+<Form ButtonText="Update" ann="ann"
+      OnValidSubmit="@EditAnnons" />
+<button class="btn btn-light" @onclick="Cancel">Cancel</button>
+@code {
+    [Parameter] 
+    public int annonsId { get; set; }
+    Annons? ann = new Annons();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        ann = await http.GetFromJsonAsync<Annons>($"api/annons/{annonsId}");
+    }
+
+    async Task EditAnnons()
+    {
+        await http.PutAsJsonAsync("api/annons", ann);
+        await js.InvokeVoidAsync("alert", $"Updated Successfully!");
+        uriHelper.NavigateTo("personalkonto");
+    }
+
+    public void Cancel()
+    {
+        uriHelper.NavigateTo("/personalkonto");
+    }
+}

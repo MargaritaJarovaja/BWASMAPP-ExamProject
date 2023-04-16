@@ -15,6 +15,14 @@ namespace BWASMAPP.Server.Data
         {
         }
         public DbSet<Annons> Annonser { get; set; }
-       
+        //public DbSet<ApplicationUser>? Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.ApplyConfiguration(new RoleConfiguration());
+        }
+
     }
 }

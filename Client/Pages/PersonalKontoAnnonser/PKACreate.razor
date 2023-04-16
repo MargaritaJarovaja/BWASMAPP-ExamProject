@@ -1,0 +1,29 @@
+﻿@page "/personalkontoannonser/pkacreate"
+@inject HttpClient http
+@inject NavigationManager uriHelper
+@using BWASMAPP.Client.Pages.Annonser
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+
+<h3>PKACreate</h3>
+
+<Form ButtonText="Create Annons" ann="@ann"
+      OnValidSubmit="@CreateAnnons" />
+<button class="btn btn-light" @onclick="Cancel">Cancel</button>
+
+
+@code {
+    Annons ann = new Annons();
+
+    async Task CreateAnnons()
+    {
+        await http.PostAsJsonAsync("api/annons", ann);
+        uriHelper.NavigateTo("personalkonto");
+    }
+
+    public void Cancel()
+    {
+        uriHelper.NavigateTo("/personalkonto");
+    }
+}

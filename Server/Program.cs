@@ -9,7 +9,7 @@ using BWASMAPP.Server.Areas.Identity;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +23,31 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+//builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//    .AddDefaultTokenProviders()
+//    .AddRoles<IdentityRole>()
+//    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+//builder.Services.AddIdentityServer()
+//    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+
 builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt =>
+    {
+        opt.IdentityResources["openid"].UserClaims.Add("role");
+        opt.ApiResources.Single().UserClaims.Add("role");
+    });
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
+
+
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("RequireLoggedIn", policy => policy.RequireAuthenticatedUser());
+//    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("admin"));
+//    options.AddPolicy("RequireUserRole", policy => policy.RequireRole("user"));
+//});
+
 
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();

@@ -13,6 +13,7 @@ namespace BWASMAPP.Shared.Models
         public string? Discription { get; set; }
         public decimal Price { get; set; }
         public string? UserId { get; set; }
+        public string? Contact { get; set; }
         public byte[]? Image { get; set; }
         public DateTime CreatedAt { get; set; }
     }

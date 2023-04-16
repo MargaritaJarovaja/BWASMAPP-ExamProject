@@ -1,65 +1,145 @@
 ﻿@page "/personalkonto"
 @inject HttpClient client
+@inject IJSRuntime js
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using System.Security.Claims;
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @attribute [Authorize]
 
+
+
 <h3>PersonalKonto</h3>
+<table class="table table-striped">
 
+    <AuthorizeView>
+        <Authorized>
+            <a class="text-dark px-5" href="authentication/profile">Hej,  @context.User.Identity.Name!</a>                  
+            
+        </Authorized>
 
-<table>
+    </AuthorizeView>
+  
+    <div class="form-group">
+       @* <a class="btn btn-success" href="annonser/create"><i class="oi oi-plus"></i> Create New</a>*@
+        <a class="btn btn-success" href="personalkontoannonser/pkacreate"><i class="oi oi-plus"></i> Create New</a>
+    </div>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>UserId</th>
+        </tr>
+    </thead>
     <tbody>
-        @if (annonsUser != null)
-        {
-            @foreach (var ann in annonsUser)
+        
+
+        
+            @if (annonser != null && annonser.Length > 0)
+            {
+                @foreach (var ann in annonser)
+                {
+                    @if (userId == @ann.UserId)
+                    {
+
+                        <tr>
+                            <td>@ann.Title</td>
+                            <td>@ann.Discription</td>
+                            <td>@ann.Price</td>
+                            <td>
+                                @if (ann.Image != null)
+                                {
+                                    <img src="data:image;base64,@(Convert.ToBase64String(ann.Image))" style="max-width: 100px;" />
+                                }
+                            </td>
+                            <td>@ann.UserId</td>
+                        <td>
+                            <a class="btn btn-success" href="personalkontoannonser/pkadetails/@ann.Id">Show more</a>
+                            <a class="btn btn-success" href="personalkontoannonser/pkaedit/@ann.Id">Edit</a>
+                            <button class="btn btn-danger" @onclick="@(() => Delete(ann.Id))">Delete</button>
+                        </td>
+                        </tr>
+
+                       
+                    }
+
+                 
+                }
+            }
+            else
             {
                 <tr>
-                    <td>@ann.Title</td>
-                    <td>@ann.Discription</td>
-                    <td>@ann.Price</td>
-                    <td>
-                        @if (ann.Image != null)
-                        {
-                            <img src="data:image;base64,@(Convert.ToBase64String(ann.Image))" style="max-width: 100px;" />
-                        }
-                    </td>
+                    <td colspan="4">No annons found for current user.</td>
                 </tr>
             }
-        }
+
+       
+      
     </tbody>
 </table>
 
+
+
 @code {
 
-    private Annons[]? annonsUser;
-    Annons[]? annonser { get; set; }
+    //private Annons[]? annonsUser;//spisok annonsov etogo user
+    Annons[]? annonser { get; set; }//spisok vseh annons
     public int Id { get; set; }
-    protected Annons[]? searchAnnonsData { get; set; }
-    protected Annons annons = new();
-    protected string SearchString { get; set; } = string.Empty;
+    //protected Annons[]? searchAnnonsData { get; set; }
+    protected Annons annons = new();//sozdat novij annons
+    protected string SearchString { get; set; } = string.Empty;//filtr
+    public string? userId;
 
     protected override async Task OnInitializedAsync()
     {
+
         annonser = await client.GetFromJsonAsync<Annons[]>("api/annons");
-        searchAnnonsData = annonser;
+      
         try
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var userId = int.Parse(authState.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            annonsUser = await client.GetFromJsonAsync<Annons[]>($"api/annons/user/{userId}");
-
-            if (annonsUser == null)
+            if (authState?.User?.Identity?.IsAuthenticated ?? true)
             {
-                annonsUser = Array.Empty<Annons>();
-                Console.WriteLine("Annons data:" + annonsUser);
+                var username = authState.User.Identity.Name;
+
+                //var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                userId = authState.User.FindFirst(c => c.Type == "sub")?.Value;
+
+                //var userId = int.Parse(authState.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                //annonsUser = await client.GetFromJsonAsync<Annons[]>($"api/annons/user/{userId}");
+
             }
+
+            //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            //var userId = int.Parse(authState.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            //annonsUser = await client.GetFromJsonAsync<Annons[]>($"api/annons/user/{userId}");
+        
+            //if (annonsUser == null)
+            //{
+            //    annonsUser = Array.Empty<Annons>();
+            //    //Console.WriteLine("Annons data:" + annonsUser);
+            //    //Console.WriteLine("Annons data:" + annonser);
+            //}
+            //Console.WriteLine("Annons data:" + annonsUser);
+            //Console.WriteLine("Annons data:" + annonser);
+            //Console.WriteLine($"annonsUser: {annonsUser}");
         }
         catch (Exception ex)
         {
             // Здесь можно использовать любую систему логирования для записи сообщения об ошибке.
             Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+    async Task Delete(int annonsId)
+    {
+        var ann = annonser.First(x => x.Id == annonsId);
+        if (await js.InvokeAsync<bool>("confirm", $"Do you want to delete {ann.Title}'s ({ann.Id}) Record?"))
+        {
+            await client.DeleteAsync($"api/annons/{annonsId}");
+            await OnInitializedAsync();
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Security.Claims;
 namespace BWASMAPP.Server.Controllers
 {
     [Authorize]
+    //[Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class AnnonsController : ControllerBase
@@ -18,29 +19,30 @@ namespace BWASMAPP.Server.Controllers
         {
             _context = context;
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var ann = await _context.Annonser.ToListAsync();
             return Ok(ann);
         }
-              
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var ann = await _context.Annonser.FirstOrDefaultAsync(a => a.Id == id);
             return Ok(ann);
         }
-      
 
+        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<Annons>>> GetAnnonsByUserId(int userId)
         {
             return await _context.Annonser.Where(x => Convert.ToInt32(x.UserId) == userId).ToListAsync();
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post(Annons annons)
         {
@@ -51,6 +53,7 @@ namespace BWASMAPP.Server.Controllers
             return Ok(annons.Id);
         }
 
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Put(Annons annons)
         {
@@ -59,6 +62,7 @@ namespace BWASMAPP.Server.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
